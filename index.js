@@ -3,6 +3,7 @@ const $$ = document.querySelectorAll.bind(document);
 
 const PLAYER_STORAGE_KEY = 'HUY_DO'
 
+const container = $('.container');
 const player = $('.player');
 const playlist = $('.playlist');
 const cd = $('.cd');
@@ -153,11 +154,11 @@ const app = {
     }
 
     // Khi tiến độ bài hát thay đổi
-
     audio.ontimeupdate = function() {
       if (audio.duration) {
         const progressPercent = Math.floor(audio.currentTime / audio.duration * 100);
         progress.value = progressPercent;
+        progress.style.background = `linear-gradient(to right, darkred 0%, darkred ${progressPercent}%, #d3d3d3 ${progressPercent}%, #d3d3d3 100%)`
       }
     }
 
@@ -251,6 +252,7 @@ const app = {
   loadCurrentSong: function () {
     heading.textContent = this.currentSong.name;
     cdThumb.style.backgroundImage = `url('${this.currentSong.image}')`;
+    container.style.backgroundImage = `url('${this.currentSong.image}')`;
     audio.src = this.currentSong.path;
 
   },
