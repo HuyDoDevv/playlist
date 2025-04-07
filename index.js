@@ -33,49 +33,57 @@ const app = {
       name: "Mất Kết Nối",
       singer: "Dương Domic",
       path: "./songs/song-1.mp3",
-      image: "./images/image-1.jpg"
+      image: "./images/image-1.jpg",
+      heart: false
     },
     {
       name: "Tái Sinh",
       singer: "Tùng Dương",
       path: "./songs/song-2.mp3",
-      image: "./images/image-2.jpg"
+      image: "./images/image-2.jpg",
+      heart: false
     },
     {
       name: "E Là Không Thể",
       singer: "Anh Quân",
       path: "./songs/song-3.mp3",
-      image: "./images/image-3.jpg"
+      image: "./images/image-3.jpg",
+      heart: false
     },
     {
       name: "Id 072019",
       singer: "W/n",
       path: "./songs/song-4.mp3",
-      image: "./images/image-4.jpg"
+      image: "./images/image-4.jpg",
+      heart: false
     },
     {
       name: "Chân Ái",
       singer: "Orange, Khói, Châu Đăng Khoa",
       path: "./songs/song-5.mp3",
-      image: "./images/image-5.jpg"
+      image: "./images/image-5.jpg",
+      heart: false
     },
     {
       name: "Hạ Còn Vương Nắng",
       singer: "DatKaa",
       path: "./songs/song-6.mp3",
-      image: "./images/image-6.jpg"
+      image: "./images/image-6.jpg",
+      heart: false
     },
     {
       name: "Sự Nghiệp Chướng",
       singer: "Pháo",
       path: "./songs/song-7.mp3",
-      image: "./images/image-7.webp"
+      image: "./images/image-7.webp",
+      heart: false
     },
     {
       name: "Gặp Lại Năm Ta 60",
       singer: "Orange",
       path: "./songs/song-8.mp3",
-      image: "./images/image-8.jpeg"
+      image: "./images/image-8.jpeg",
+      heart: false
     }
   ],
   defineProperties: function() {
@@ -96,7 +104,11 @@ const app = {
           <p class="author">${song.singer}</p>
         </div>
         <div class="option">
-          <i class="fas fa-ellipsis-h"></i>
+          <i class="option-icon option-icon-heart${song.heart ? 'active' : ''} fa-regular fa-heart"></i>
+          <a href="${song.path}" download="${song.name}" class="link-download">
+            <i class="option-icon fa-solid fa-download"></i>
+          </a>
+          <i class="option-icon option-icon-cancel fa-solid fa-xmark"></i>
         </div>
       </div>
       `
@@ -217,25 +229,38 @@ const app = {
 
     // Lắng nghe playlist
     playlist.onclick = function (e) {
-      const songNode = e.target.closest('.song:not(.active)');
+      const songNodeNotActive = e.target.closest('.song:not(.active)');
+      const songNode = e.target.closest('.song');
       const optionNode = e.target.closest('.option');
 
-      if (songNode && !optionNode) {
-        if (songNode ) {
-          _this.currentIndex = Number(songNode.dataset.index);
+      if (songNodeNotActive && !optionNode) {
+        if (songNodeNotActive) {
+          _this.currentIndex = Number(songNodeNotActive.dataset.index);
           _this.loadCurrentSong();
           audio.play();
           _this.render();
          }
+      }
 
-        if (optionNode) {
+      if (optionNode) {
+        if (e.target.classList.contains('option-icon-heart')) {
+          const isLiked = e.target.classList.toggle('fa-solid');
+          // _this.songs[Number(songNode.dataset.index)].heart = isLiked;
 
+          e.target.classList.toggle('fa-regular', !isLiked);
+          e.target.classList.toggle('option-icon-heart-active', isLiked);
         }
-
+        if (e.target.classList.contains('option-icon-cancel')) {
+          let text = "Do you want to remove this song from the playlist!\nEither OK or Cancel.";
+          if (confirm(text) == true) {
+            songNode.remove();
+            if (songNode.dataset.index == _this.currentIndex) {
+              nextBtn.click();
+            }
+          }
+        }
       }
     }
-
-
   },
   loadConfig: function() {
     this.isRandom = this.config.isRandom;
