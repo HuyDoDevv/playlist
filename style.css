@@ -158,7 +158,7 @@ header h2 {
 
 /* PLAYLIST */
 .playlist {
-  padding-top: 400px;
+  padding-top: 460px;
 }
 
 .song {
@@ -238,4 +238,26 @@ header h2 {
 
 .option-icon-cancel:hover {
   color: red;
+}
+
+.search-playlist {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.search-container {
+  border: 1px solid black;
+  border-radius: 10px;
+  width: 60%;
+}
+
+.search-text {
+  width: 90%;
+  outline: none;
+  padding: 4px 0px 4px 4px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
 }

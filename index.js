@@ -17,6 +17,8 @@ const nextBtn = $('.btn-next');
 const prevBtn = $('.btn-prev');
 const randomBtn = $('.btn-random');
 const repeatBtn = $('.btn-repeat');
+const searchtText = $('.search-text');
+const songNodes = $$('.song');
 
 const app = {
   currentIndex: 0,
@@ -227,6 +229,15 @@ const app = {
       }
     }
 
+    // search playlist
+    searchtText.onkeyup = function(e) {
+      let debounceTimer;
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        _this.filterSongs(e.target.value);
+      }, 1000);
+    }
+
     // Lắng nghe playlist
     playlist.onclick = function (e) {
       const songNodeNotActive = e.target.closest('.song:not(.active)');
@@ -280,6 +291,17 @@ const app = {
     container.style.backgroundImage = `url('${this.currentSong.image}')`;
     audio.src = this.currentSong.path;
 
+  },
+  filterSongs: function(query) {
+    const queryUpper = query.toUpperCase();
+    const songNodes = $$('.song');
+    songNodes.forEach(element => {
+      const title = element.querySelector('.title').textContent.toUpperCase();
+      const author = element.querySelector('.author').textContent.toUpperCase();
+  
+      const isMatch = title.includes(queryUpper) || author.includes(queryUpper);
+      element.style.display = isMatch || query === '' ? 'flex' : 'none';
+    });
   },
   nextSong: function() {
     this.currentIndex++;
