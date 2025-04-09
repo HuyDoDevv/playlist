@@ -19,6 +19,8 @@ const prevBtn = $('.btn-prev');
 const randomBtn = $('.btn-random');
 const repeatBtn = $('.btn-repeat');
 const searchtText = $('.search-text');
+const totalTime = $('.total-time');
+const currentTime = $('.current-time');
 
 const app = {
   currentIndex: 0,
@@ -169,10 +171,21 @@ const app = {
     audio.ontimeupdate = function() {
       if (audio.duration) {
         const progressPercent = Math.floor(audio.currentTime / audio.duration * 100);
+        const minutes = Math.floor(Math.floor(audio.currentTime) / 60);
+        const remainingSeconds = Math.floor(audio.currentTime) % 60;
+
+        currentTime.textContent = _this.formatTime(minutes, remainingSeconds);
         progress.value = progressPercent;
         progress.style.background = `linear-gradient(to right, darkred 0%, darkred ${progressPercent}%, #d3d3d3 ${progressPercent}%, #d3d3d3 100%)`
       }
     }
+
+    audio.onloadedmetadata = function() {
+      const duration = audio.duration; 
+      const minutes = Math.floor(duration / 60);
+      const remainingSeconds = Math.floor(duration % 60);
+      totalTime.textContent = _this.formatTime(minutes, remainingSeconds);
+    };
 
     // Xử lý khi tua
     progress.onchange = function(e) {
@@ -242,7 +255,6 @@ const app = {
       if (optionNode) {
         if (e.target.classList.contains('option-icon-heart')) {
           const isLiked = e.target.classList.toggle('fa-solid');
-          console.log(isLiked);
           _this.songs[Number(songNode.dataset.index)].heart = isLiked;
           _this.setConfig('songs', _this.songs);
           e.target.classList.toggle('fa-regular', !isLiked);
@@ -300,6 +312,9 @@ const app = {
     });
   },
 
+  formatTime: function(minutes, remainingSeconds) {
+    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+  },
   nextSong: function() {
     this.currentIndex++;
     if (this.currentIndex >= this.songs.length) {

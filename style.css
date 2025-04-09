@@ -267,3 +267,10 @@ header h2 {
 .search-icon {
   color: #9e9e9e;
 }
+
+.progress-time {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 12px;
+}
