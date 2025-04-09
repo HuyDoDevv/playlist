@@ -114,6 +114,7 @@ header h2 {
   color: #666;
   padding: 18px;
   font-size: 18px;
+  cursor: pointer;
 }
 
 .control .btn.active {
@@ -261,4 +262,8 @@ header h2 {
   border: none;
   border-radius: 10px;
   font-size: 14px;
+}
+
+.search-icon {
+  color: #9e9e9e;
 }

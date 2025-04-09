@@ -18,7 +18,6 @@ const prevBtn = $('.btn-prev');
 const randomBtn = $('.btn-random');
 const repeatBtn = $('.btn-repeat');
 const searchtText = $('.search-text');
-const songNodes = $$('.song');
 
 const app = {
   currentIndex: 0,
@@ -106,7 +105,7 @@ const app = {
           <p class="author">${song.singer}</p>
         </div>
         <div class="option">
-          <i class="option-icon option-icon-heart${song.heart ? 'active' : ''} fa-regular fa-heart"></i>
+          <i class="option-icon option-icon-heart ${song.heart ? 'option-icon-heart-active fa-heart fa-solid' : 'fa-regular fa-heart'}"></i>
           <a href="${song.path}" download="${song.name}" class="link-download">
             <i class="option-icon fa-solid fa-download"></i>
           </a>
@@ -122,7 +121,6 @@ const app = {
   },
   handleEvents: function () {
     const _this = this;
-
     // Xử lý cd quay và dừng
 
     const cdThumbAnimate = cdThumb.animate([
@@ -142,7 +140,6 @@ const app = {
       cd.style.width = newCdWidth > 0 ? `${newCdWidth}px` : 0;
       cd.style.opacity = newCdWidth / cdWidth;
     }
-
 
     // Xử lý khi click play
     playBtn.onclick = function () {
@@ -184,11 +181,7 @@ const app = {
 
     // Khi tới bài hát
     nextBtn.onclick = function () {
-      if (_this.isRandom) {
-        _this.playRandomSong();
-      } else {
-        _this.nextSong();
-      }
+      _this.isRandom ? _this.playRandomSong() : _this.nextSong();
       audio.play();
       _this.render();
       _this.scrollToActiveSong();
@@ -196,11 +189,7 @@ const app = {
 
     // Khi lui bài hát
     prevBtn.onclick = function () {
-      if (_this.isRandom) {
-        _this.playRandomSong();
-      } else {
-        _this.prevSong();
-      }
+      _this.isRandom ? _this.playRandomSong() : _this.prevSong();
       audio.play();
       _this.render();
       _this.scrollToActiveSong();
@@ -213,7 +202,7 @@ const app = {
       randomBtn.classList.toggle('active', _this.isRandom);
     }
 
-    // Xử lý
+    // Xử lý 
     repeatBtn.onclick = function () {
       _this.isRepeat = !_this.isRepeat;
       _this.setConfig('isRepeat', _this.isRepeat);
@@ -222,11 +211,7 @@ const app = {
 
     // Xử lý khi hết bài hát
     audio.onended = function () {
-      if (_this.isRepeat) {
-        audio.play();
-      } else {
-        nextBtn.click();
-      }
+      _this.isRepeat ? audio.play() : nextBtn.click();
     }
 
     // search playlist
@@ -256,8 +241,9 @@ const app = {
       if (optionNode) {
         if (e.target.classList.contains('option-icon-heart')) {
           const isLiked = e.target.classList.toggle('fa-solid');
-          // _this.songs[Number(songNode.dataset.index)].heart = isLiked;
-
+          console.log(isLiked);
+          _this.songs[Number(songNode.dataset.index)].heart = isLiked;
+          _this.setConfig('songs', _this.songs);
           e.target.classList.toggle('fa-regular', !isLiked);
           e.target.classList.toggle('option-icon-heart-active', isLiked);
         }
@@ -265,33 +251,42 @@ const app = {
           let text = "Do you want to remove this song from the playlist!\nEither OK or Cancel.";
           if (confirm(text) == true) {
             songNode.remove();
-            if (songNode.dataset.index == _this.currentIndex) {
-              nextBtn.click();
+            _this.songs.splice(songNode.dataset.index,1)
+            _this.setConfig('songs', _this.songs);
+            if (Number(songNode.dataset.index) == _this.currentIndex) {
+              _this.loadCurrentSong();
+              audio.play();
+              _this.render();
             }
           }
         }
       }
     }
   },
+  
   loadConfig: function() {
     this.isRandom = this.config.isRandom;
     this.isRepeat = this.config.isRepeat;
+    this.songs = this.config.songs;
   },
+
   scrollToActiveSong: function() {
-    setTimeout(() => {
-      $('.song.active').scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      }, 300)
-    })
+    let defindBlockProprety = this.currentIndex == 0 ? 'end' : 'nearest'
+      setTimeout(() => {
+        $('.song.active').scrollIntoView({
+          behavior: 'smooth',
+          block: defindBlockProprety,
+        }, 300)
+      })
   },
+
   loadCurrentSong: function () {
     heading.textContent = this.currentSong.name;
     cdThumb.style.backgroundImage = `url('${this.currentSong.image}')`;
     container.style.backgroundImage = `url('${this.currentSong.image}')`;
     audio.src = this.currentSong.path;
-
   },
+
   filterSongs: function(query) {
     const queryUpper = query.toUpperCase();
     const songNodes = $$('.song');
@@ -303,6 +298,7 @@ const app = {
       element.style.display = isMatch || query === '' ? 'flex' : 'none';
     });
   },
+
   nextSong: function() {
     this.currentIndex++;
     if (this.currentIndex >= this.songs.length) {
@@ -318,6 +314,7 @@ const app = {
     }
     this.loadCurrentSong();
   },
+
   playRandomSong: function() {
     let newIndex;
     do {
@@ -346,6 +343,5 @@ const app = {
     this.render();
   }
 };
-
 
 app.start();
