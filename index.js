@@ -21,17 +21,18 @@ const repeatBtn = $('.btn-repeat');
 const searchtText = $('.search-text');
 const totalTime = $('.total-time');
 const currentTime = $('.current-time');
+const actionIcon = $('.action-icon');
+const listAction = $('.list-action');
+const filterFavourite = $('.filter-favourite');
+const filterFavouriteIcon = $('.filter-favourite-icon');
 
 const app = {
   currentIndex: 0,
   isPlaying: false,
   isRandom: false,
   isRepeat: false,
+  isFilterLiked: false,
   config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
-  setConfig: function(key, value) {
-    this.config[key] = value;
-    localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config))
-  },
   songs: [
     {
       name: "Mất Kết Nối",
@@ -90,19 +91,32 @@ const app = {
       heart: false
     }
   ],
-  defineProperties: function() {
-    Object.defineProperty(this, 'currentSong', {
-      get: function() {
-        return this.songs[this.currentIndex];
-      }
-    })
+
+  // Lưu cấu hình vào localStorage
+  setConfig(key, value) {
+    this.config[key] = value;
+    localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config));
   },
-  render: function() {
-    const htmls = this.songs.map((song, index) => {
-      return `
+
+  defineProperties() {
+    Object.defineProperty(this, 'currentSong', {
+      get: () => this.songs[this.currentIndex],
+    });
+  },
+  
+  render() {
+    const htmls = this.songs
+      .filter((song) => (this.isFilterLiked ? song.heart : true))
+      .map((song, index) => this.createSongHtml(song, index));
+
+    playlist.innerHTML = htmls.join('');
+    this.updateButtons();
+  },
+
+  createSongHtml(song, index) {
+    return `
       <div class="song ${index === this.currentIndex ? 'active' : ''}" data-index='${index}'>
-        <div class="thumb" style="background-image: url(${song.image})">
-        </div>
+        <div class="thumb" style="background-image: url(${song.image})"></div>
         <div class="body">
           <h3 class="title">${song.name}</h3>
           <p class="author">${song.singer}</p>
@@ -115,23 +129,24 @@ const app = {
           <i class="option-icon option-icon-cancel fa-solid fa-xmark"></i>
         </div>
       </div>
-      `
-    });
+    `;
+  },
 
-    playlist.innerHTML = htmls.join('');
+  updateButtons() {
     randomBtn.classList.toggle('active', this.isRandom);
     repeatBtn.classList.toggle('active', this.isRepeat);
+    filterFavouriteIcon.classList.toggle('fa-solid', this.isFilterLiked);
+    filterFavouriteIcon.classList.toggle('filter-favourite-icon-active', this.isFilterLiked);
   },
+
   handleEvents: function () {
     const _this = this;
-    // Xử lý cd quay và dừng
 
-    const cdThumbAnimate = cdThumb.animate([
-      { transform: 'rotate(360deg)'}
-    ], {
-      duration: 10000, // 10s
-      iterations: Infinity
-    })
+    // Xử lý cd quay và dừng
+    const cdThumbAnimate = cdThumb.animate([{ transform: 'rotate(360deg)' }], {
+      duration: 10000,
+      iterations: Infinity,
+    });
 
     cdThumbAnimate.pause();
 
@@ -146,11 +161,7 @@ const app = {
 
     // Xử lý khi click play
     playBtn.onclick = function () {
-      if (_this.isPlaying) {
-        audio.pause()
-      } else {
-        audio.play()
-      }
+      _this.isPlaying ? audio.pause() : audio.play();
     }
 
      // Khi audio chạy
@@ -237,6 +248,26 @@ const app = {
       }, 1000);
     }
 
+    actionIcon.onclick = function() {
+      listAction.classList.toggle('hidden');
+    }
+
+    filterFavourite.onclick = function() {
+      _this.isFilterLiked = !_this.isFilterLiked;
+      _this.setConfig('isFilterLiked', _this.isFilterLiked);
+      filterFavouriteIcon.classList.toggle('fa-solid', _this.isFilterLiked);
+      filterFavouriteIcon.classList.toggle('filter-favourite-icon-active', _this.isFilterLiked);
+      const songNodes = $$('.song');
+   
+      if (_this.isFilterLiked) {
+        songNodes.forEach((element,index) => {
+          element.style.display = _this.songs[index].heart ? 'flex' : 'none';
+        });
+      }else{
+        _this.render();
+      }
+      _this.scrollToActiveSong();
+    }
     // Lắng nghe playlist
     playlist.onclick = function (e) {
       const songNodeNotActive = e.target.closest('.song:not(.active)');
@@ -276,21 +307,11 @@ const app = {
       }
     }
   },
-  
   loadConfig: function() {
     this.isRandom = this.config.isRandom || false;
     this.isRepeat = this.config.isRepeat || false;
+    this.isFilterLiked = this.config.isFilterLiked || false;
     this.songs = this.config.songs || this.songs;
-  },
-
-  scrollToActiveSong: function() {
-    let defindBlockProprety = this.currentIndex == 0 ? 'end' : 'nearest'
-      setTimeout(() => {
-        $('.song.active').scrollIntoView({
-          behavior: 'smooth',
-          block: defindBlockProprety,
-        }, 300)
-      })
   },
 
   loadCurrentSong: function () {
@@ -315,6 +336,7 @@ const app = {
   formatTime: function(minutes, remainingSeconds) {
     return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
   },
+
   nextSong: function() {
     this.currentIndex++;
     if (this.currentIndex >= this.songs.length) {
@@ -340,6 +362,17 @@ const app = {
       this.loadCurrentSong();
     }
   },
+
+  scrollToActiveSong: function() {
+    let defindBlockProprety = this.currentIndex == 0 ? 'end' : 'nearest'
+      setTimeout(() => {
+        $('.song.active').scrollIntoView({
+          behavior: 'smooth',
+          block: defindBlockProprety,
+        }, 300)
+      })
+  },
+
   start: function () {
     // Gán cấu hình config
     this.loadConfig();
@@ -347,10 +380,8 @@ const app = {
     // Định nghĩ các thuộc tính cho object
     this.defineProperties();
 
-
     // Lắng nghe và xử lý các sự kiện
     this.handleEvents();
-
 
     // Tải thông tin bài hát đầu tiên
     this.loadCurrentSong();

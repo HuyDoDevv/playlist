@@ -160,7 +160,7 @@ header h2 {
 
 /* PLAYLIST */
 .playlist {
-  padding-top: 460px;
+  padding-top: 480px;
 }
 
 .song {
@@ -273,4 +273,44 @@ header h2 {
   align-items: center;
   justify-content: flex-start;
   font-size: 12px;
+}
+
+.name-song {
+  flex: 1;
+}
+
+.action-container {
+  display: flex;
+  text-align: center;
+  align-items: center;
+  position: relative;
+}
+
+.action-icon {
+  cursor: pointer;
+}
+
+.list-action {
+  position: absolute;
+  top: 26px;
+  right: -160px;
+  margin: 0;
+  list-style: none;
+  text-align: start;
+  background-color: #d3d3d3;
+  padding: 6px;
+  border-radius: 10px;
+}
+
+.action-item:hover {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.list-action.hidden {
+  display: none;
+}
+
+.filter-favourite-icon-active {
+  color: red;
 }
