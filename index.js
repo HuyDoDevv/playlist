@@ -2,6 +2,7 @@ const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
 
 const PLAYER_STORAGE_KEY = 'HUY_DO'
+var FIRSTBEGINNING = true;
 
 const container = $('.container');
 const player = $('.player');
@@ -265,9 +266,9 @@ const app = {
   },
   
   loadConfig: function() {
-    this.isRandom = this.config.isRandom;
-    this.isRepeat = this.config.isRepeat;
-    this.songs = this.config.songs;
+    this.isRandom = this.config.isRandom || false;
+    this.isRepeat = this.config.isRepeat || false;
+    this.songs = this.config.songs || this.songs;
   },
 
   scrollToActiveSong: function() {
